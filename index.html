@@ -2,82 +2,178 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XOS.go</title>
-    <link rel="manifest" href="manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>XOS.go | Sovereign Transit</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#007aff">
+    <link rel="apple-touch-icon" href="./xosgo.png">
+
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap">
+
     <style>
         :root {
             --bg: #000000;
             --accent: #007aff;
             --card: #0a0a0a;
             --border: #1a1a1a;
+            --glass: rgba(10, 10, 10, 0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             background-color: var(--bg);
             color: #ffffff;
             font-family: 'Space Grotesk', sans-serif;
-            margin: 0;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
             overflow: hidden;
+            /* Subtle center glow for depth */
+            background: radial-gradient(circle at center, #050505 0%, #000000 100%);
         }
 
-        .xos-card {
-            background: var(--card);
+        /* xos1 Glassmorphic Utility Card */
+        .xos-container {
+            background: var(--glass);
             border: 1px solid var(--border);
-            padding: 2rem;
-            border-radius: 12px;
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 2.5rem;
+            border-radius: 24px;
             text-align: center;
-            width: 80%;
+            width: 90%;
             max-width: 400px;
-            backdrop-filter: blur(10px);
+            
+            /* xos1 Slide-up Animation */
             transform: translateY(20px);
-            animation: slideUp 0.6s ease forwards;
+            opacity: 0;
+            animation: xos-launch 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        .brand-logo {
-            font-size: 3rem;
+        .brand {
+            font-size: 3.5rem;
             font-weight: 700;
-            letter-spacing: -2px;
-            margin-bottom: 0.5rem;
+            letter-spacing: -3px;
+            margin-bottom: 0.2rem;
+            user-select: none;
         }
 
-        .brand-logo span { color: var(--accent); }
+        .brand span {
+            color: var(--accent);
+        }
 
-        .dev-badge {
+        .subtitle {
+            font-weight: 300;
+            color: #666;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+
+        .badge-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 2.5rem;
+        }
+
+        /* xos1 Developer Badge (8px, tracked-out) */
+        .badge {
             font-size: 8px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: var(--accent);
             border: 1px solid var(--border);
             padding: 4px 10px;
             border-radius: 4px;
+            color: #444;
         }
 
-        @keyframes slideUp {
-            to { transform: translateY(0); opacity: 1; }
+        .badge.active {
+            color: var(--accent);
+            border-color: rgba(0, 122, 255, 0.2);
+        }
+
+        /* Action Button with Active Scale State */
+        .btn-go {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1.2rem;
+            border-radius: 14px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            width: 100%;
+            cursor: pointer;
+            transition: transform 0.1s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            box-shadow: 0 10px 30px rgba(0, 122, 255, 0.2);
+        }
+
+        .btn-go:active {
+            transform: scale(0.96); /* xos1 active state */
+        }
+
+        @keyframes xos-launch {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Atmospheric Glow */
+        .glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            filter: blur(150px);
+            opacity: 0.05;
+            z-index: -1;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
     </style>
 </head>
 <body>
 
-    <div class="xos-card">
-        <div class="brand-logo">XOS<span>.go</span></div>
-        <div style="margin-bottom: 20px;">Sovereign Transit Node</div>
-        <div class="dev-badge">Status: Online | P=1.0</div>
+    <div class="glow"></div>
+
+    <div class="xos-container">
+        <div class="brand">XOS<span>.go</span></div>
+        <p class="subtitle">Sovereign Position Engine</p>
+        
+        <div class="badge-row">
+            <div class="badge active">Node: HRP-583131</div>
+            <div class="badge">P=1.0 Active</div>
+        </div>
+
+        <button class="btn-go" onclick="runKernel()">INITIALIZE TRAVEL</button>
     </div>
 
     <script>
-        // Service Worker Registration
+        // Registration using Relative Anchor
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(() => console.log("XOS.go System Active"))
-                .catch(err => console.log("System Error", err));
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Kernel Online:', reg.scope))
+                    .catch(err => console.error('Kernel Fault:', err));
+            });
+        }
+
+        function runKernel() {
+            // Trigger for future a*a matrix calculations
+            console.log("XOS.go: Initializing local position matrix...");
         }
     </script>
 </body>
