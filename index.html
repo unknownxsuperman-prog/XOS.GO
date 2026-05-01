@@ -66,7 +66,7 @@ body.dark::before{opacity:.10}
 
 /* logo containers — background‑image for perfect fit */
 .logo-box, .logo-sm {
-  background: #0a0a0a;
+  background: #000000;
   border-radius: var(--r-logo);
   display: flex;
   align-items: center;
@@ -74,18 +74,20 @@ body.dark::before{opacity:.10}
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0,0,0,.22);
   flex-shrink: 0;
-  background-size: cover;
+  background-size: 70%;
   background-position: center;
   background-repeat: no-repeat;
+  border: 1px solid var(--glass-border);
 }
 .logo-box {
-  width: 68px;
-  height: 68px;
+  width: 64px;
+  height: 64px;
 }
 .logo-sm {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 10px;
+  background-size: 65%;
 }
 /* hide any img inside – we use background-image */
 .logo-box img, .logo-sm img {
@@ -339,7 +341,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
 <button id="bypass" onclick="devBypass()"><i class="fa-solid fa-bolt-lightning"></i> Dev Bypass</button>
 <div class="m-overlay" id="m-overlay" onclick="closeMenu()"></div>
 
-<!-- MENU DRAWER -->
 <div class="m-drawer" id="m-drawer">
   <div class="m-head">
     <div class="lbl">Navigation</div>
@@ -365,7 +366,7 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
   <div class="m-sec">
     <div class="lbl" style="margin-bottom:3px">Follow Us</div>
     <div class="m-row">
-      <a href="https://github.com" target="_blank" class="hlk" style="font-size:.84rem"><i class="fa-brands fa-github"></i> github.com/xosgo</a>
+      <a href="https://github.com" target="_blank" class="hlk" style="font-size:.84rem"><i class="fa-solid fa-link"></i> github.com/xosgo</a>
       <button class="f-pill" id="f-btn" onclick="handleFollow()">Follow</button>
     </div>
   </div>
@@ -376,7 +377,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
   </div>
 </div>
 
-<!-- NOTIF PANEL -->
 <div class="np" id="np">
   <div class="np-head">
     <div><div class="lbl">Alerts</div><div class="app-name lg" style="margin-top:4px">Notifications</div></div>
@@ -387,12 +387,10 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
 
 <div id="app">
 
-  <!-- AUTH PAGE -->
   <div class="page active" id="page-auth">
     <div class="auth-wrap">
       <div class="fu" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:14px">
-        <!-- big logo with background image and fallback -->
-        <div class="logo-box" style="background-image: url('logo.png'); background-size: cover;">
+        <div class="logo-box" style="background-image: url('logo.png');">
           <span class="logo-fallback">X</span>
         </div>
         <div class="app-name xl">XOS.GO</div>
@@ -406,7 +404,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
 
       <div class="gc auth-card fu d2">
 
-        <!-- SU1 -->
         <div class="asec on" id="su1" data-tab="signup">
           <div class="lbl">Create your account</div>
           <div class="iw"><input class="inp" id="su-name" type="text" placeholder="Your full name" autocomplete="name"></div>
@@ -414,7 +411,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
           <button class="btn btn-p" onclick="suStep1()"><i class="fa-solid fa-arrow-right"></i> Continue</button>
         </div>
 
-        <!-- SU2 -->
         <div class="asec" id="su2" data-tab="signup">
           <div class="lbl">Verify number</div>
           <div class="otp-hint"><i class="fa-solid fa-circle-info" style="flex-shrink:0;margin-top:1px"></i>Enter the verification code sent to your number.</div>
@@ -428,7 +424,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
           <button class="hlk" onclick="showStep('su1')">← Change number</button>
         </div>
 
-        <!-- SU3 -->
         <div class="asec" id="su3" data-tab="signup">
           <div class="lbl">Create a password</div>
           <div class="iw">
@@ -445,7 +440,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
           <button class="btn btn-p" onclick="suStep3()"><i class="fa-solid fa-check"></i> Create Account</button>
         </div>
 
-        <!-- SI1 -->
         <div class="asec" id="si1" data-tab="signin">
           <div class="lbl">Welcome back</div>
           <div class="iw"><input class="inp" id="si-phone" type="tel" placeholder="Phone number" maxlength="10" autocomplete="tel"></div>
@@ -460,7 +454,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
           </div>
         </div>
 
-        <!-- SI2 -->
         <div class="asec" id="si2" data-tab="signin">
           <div class="lbl">OTP Verification</div>
           <div class="otp-hint"><i class="fa-solid fa-circle-info" style="flex-shrink:0;margin-top:1px"></i>Enter the code sent to verify your identity.</div>
@@ -474,7 +467,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
           <button class="hlk" onclick="showStep('si1')">← Back to login</button>
         </div>
 
-        <!-- SI3 -->
         <div class="asec" id="si3" data-tab="signin">
           <div class="lbl">Set new password</div>
           <div class="iw">
@@ -496,12 +488,10 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
     </div>
   </div>
 
-  <!-- DASHBOARD -->
   <div class="page" id="page-dashboard">
     <div class="dbar">
       <div class="dleft">
-        <!-- small logo with background image and fallback -->
-        <div class="logo-box logo-sm" style="background-image: url('logo.png'); background-size: cover;">
+        <div class="logo-box logo-sm" style="background-image: url('logo.png');">
           <span class="logo-fallback">X</span>
         </div>
         <span class="app-name lg">XOS.GO</span>
@@ -529,7 +519,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
     </div>
   </div>
 
-  <!-- RIDE SELECT -->
   <div class="page" id="page-ride">
     <div class="ph">
       <button class="bb" onclick="goTo('page-dashboard')"><i class="fa-solid fa-chevron-left"></i></button>
@@ -541,7 +530,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
     </div>
   </div>
 
-  <!-- FROM LOCATION -->
   <div class="page" id="page-location">
     <div class="ph">
       <button class="bb" onclick="goTo('page-ride')"><i class="fa-solid fa-chevron-left"></i></button>
@@ -554,7 +542,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
     </div>
   </div>
 
-  <!-- DESTINATION -->
   <div class="page" id="page-destination">
     <div class="ph">
       <button class="bb" onclick="goTo('page-location')"><i class="fa-solid fa-chevron-left"></i></button>
@@ -568,7 +555,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
     </div>
   </div>
 
-  <!-- CONFIRM -->
   <div class="page" id="page-confirm">
     <div class="ph">
       <button class="bb" onclick="goTo('page-destination')"><i class="fa-solid fa-chevron-left"></i></button>
@@ -592,7 +578,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
     </div>
   </div>
 
-  <!-- SUCCESS -->
   <div class="page" id="page-success">
     <div class="sw2">
       <div class="s-icon"><i class="fa-solid fa-check"></i></div>
@@ -606,7 +591,6 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
     </div>
   </div>
 
-  <!-- OLD RIDES -->
   <div class="page" id="page-rides">
     <div class="ph">
       <button class="bb" onclick="goTo('page-dashboard')"><i class="fa-solid fa-chevron-left"></i></button>
