@@ -1,17 +1,21 @@
 {
-  "name": "XOS.go",
-  "short_name": "XOS.go",
-  "start_url": "/index.html",
+  "name": "XOS.GO",
+  "short_name": "XOS",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#007aff",
-  "description": "Sovereign Position Engine for Harapanahalli.",
+  "theme_color": "#0a0a0a",
+  "orientation": "portrait",
   "icons": [
     {
-      "src": "xosgo.png",
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "type": "image/png"
     }
   ]
 }
