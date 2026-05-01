@@ -3,12 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0a0a0a">
 <title>XOS.GO — City Network</title>
+<link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="xosgo.png">
 <style>
 :root {
   --bg:           #f2f2f7;
@@ -825,15 +823,17 @@ function devBypass(){if(!XDB.get())XDB.set({name:'Dev User',phone:'9999999999',p
   if(u&&u.name&&u.phone&&u.password){enterDash();document.getElementById('bypass').style.display='none'}
   else switchTab('signup')
 })();
-</script>
-  <script>
-if ('serviceWorker' in navigator) {
+
+// Register Service Worker
+if('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('SW registered:', reg.scope))
-      .catch(err => console.log('SW failed:', err));
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      console.log('SW registered:', reg);
+    }).catch(err => {
+      console.log('SW registration failed:', err);
+    });
   });
 }
-  </script>
+</script>
 </body>
 </html>
