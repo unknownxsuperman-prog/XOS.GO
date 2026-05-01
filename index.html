@@ -64,11 +64,44 @@ body.dark::before{opacity:.10}
 /* glass */
 .gc{background:var(--glass);border:1.5px solid var(--glass-border);box-shadow:var(--glass-shadow);backdrop-filter:blur(28px) saturate(160%);-webkit-backdrop-filter:blur(28px) saturate(160%);border-radius:var(--r-card);transition:var(--tr)}
 
-/* logo */
-.logo-box{width:68px;height:68px;background:#0a0a0a;border-radius:var(--r-logo);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.22);flex-shrink:0}
-.logo-box img{width:48px;height:48px;object-fit:contain}
-.logo-sm{width:38px;height:38px;border-radius:10px}
-.logo-sm img{width:26px;height:26px}
+/* logo containers — background‑image for perfect fit */
+.logo-box, .logo-sm {
+  background: #0a0a0a;
+  border-radius: var(--r-logo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,.22);
+  flex-shrink: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.logo-box {
+  width: 68px;
+  height: 68px;
+}
+.logo-sm {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+}
+/* hide any img inside – we use background-image */
+.logo-box img, .logo-sm img {
+  display: none;
+}
+/* fallback text (when no background image) */
+.logo-fallback {
+  font-family: var(--font);
+  font-weight: 700;
+  color: #fff;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+.logo-sm .logo-fallback {
+  font-size: 0.88rem;
+}
 
 /* type */
 .app-name{font-family:var(--font);font-weight:700;letter-spacing:-.4px;color:var(--dark);transition:color .38s}
@@ -358,8 +391,9 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
   <div class="page active" id="page-auth">
     <div class="auth-wrap">
       <div class="fu" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:14px">
-        <div class="logo-box">
-          <img src="logo.png" alt="X" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-family:Space Grotesk;font-weight:700;color:#fff;font-size:1.35rem\'>X</span>'">
+        <!-- big logo with background image and fallback -->
+        <div class="logo-box" style="background-image: url('logo.png'); background-size: cover;">
+          <span class="logo-fallback">X</span>
         </div>
         <div class="app-name xl">XOS.GO</div>
         <div class="lbl">City Transit Network</div>
@@ -466,8 +500,9 @@ body.dark #bypass{background:rgba(255,255,255,.14)}
   <div class="page" id="page-dashboard">
     <div class="dbar">
       <div class="dleft">
-        <div class="logo-box logo-sm">
-          <img src="logo.png" alt="X" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-family:Space Grotesk;font-weight:700;color:#fff;font-size:.88rem\'>X</span>'">
+        <!-- small logo with background image and fallback -->
+        <div class="logo-box logo-sm" style="background-image: url('logo.png'); background-size: cover;">
+          <span class="logo-fallback">X</span>
         </div>
         <span class="app-name lg">XOS.GO</span>
       </div>
