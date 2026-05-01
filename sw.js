@@ -3,7 +3,7 @@ const CACHE_NAME = "xosgo-v1";
 const ASSETS = [
   "./",
   "./index.html",
-  "./logo.png",
+  "./xosgo.png",
   "./wallpaper.jpg",
   "./users.js",
   "./places.js",
