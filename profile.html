@@ -313,7 +313,7 @@ async function handleFollow() {
   updateFollowUI();
 
   if (nowFollowing) {
-    showFollowToast('✅ You're now following x0s tech!');
+    showFollowToast('✅ Following x0s tech!');
     // Telegram ping — encode fingerprint for privacy
     const fp = btoa(navigator.userAgent.slice(0, 30) + Date.now().toString().slice(-5));
     await tgNotify(`<b>👤 New Follower</b>\nProfile: x0s tech (x0s.link)\nDevice FP: <code>${fp}</code>\nFollowers now: ${XDB.getFollowerCount()}`);
