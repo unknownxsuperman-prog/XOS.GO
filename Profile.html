@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>x0s tech | x0s.link</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<!-- Shared data layer — must load before any script in this file -->
+<script src="users.js"></script>
+<script src="posts.js"></script>
+
+<style>
+/* ══════════════════════════════════════════
+   BASE / TOKENS
+══════════════════════════════════════════ */
+:root {
+  --bg:        #000000;
+  --card:      #0a0a0a;
+  --card2:     #111111;
+  --border:    #1a1a1a;
+  --border2:   rgba(255,255,255,0.06);
+  --accent:    #007aff;
+  --text:      #ffffff;
+  --muted:     #666666;
+  --muted2:    #444444;
+  --glass:     rgba(10,10,10,0.75);
+  --radius:    14px;
+  --ease:      cubic-bezier(0.4,0,0.2,1);
+  --font:      'Space Grotesk', sans-serif;
+}
+.light-mode {
+  --bg:     #ffffff;
+  --card:   #f5f5f7;
+  --card2:  #f0f0f2;
+  --border: #e0e0e2;
+  --border2:rgba(0,0,0,0.07);
+  --text:   #000000;
+  --muted:  #888888;
+  --glass:  rgba(255,255,255,0.82);
+}
+
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.35s var(--ease), color 0.35s var(--ease);
+}
+
+::-webkit-scrollbar { display: none; }
+
+/* ══════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════ */
+@keyframes slideUp   { from { transform:translateY(18px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+@keyframes pulse     { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.85)} }
+@keyframes fadeIn    { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* ══════════════════════════════════════════
+   TOP BAR & DROPDOWN
+══════════════════════════════════════════ */
+.top-bar {
+  position: sticky; top: 0; z-index: 80;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border2);
+}
+.light-mode .top-bar { background: rgba(255,255,255,0.72); border-bottom: 1px solid var(--border); }
+.top-bar-brand { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+.top-bar-brand span { color: var(--accent); }
+.menu-btn { width: 36px; height: 36px; background: var(--glass); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); position: relative; }
+
+.dropdown-menu {
+  position: absolute; top: 50px; right: 0;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 6px; display: none; z-index: 100;
+  min-width: 170px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: fadeIn 0.2s var(--ease);
+}
+.dropdown-menu.active { display: block; }
+.menu-item {
+  padding: 10px 14px; font-size: 0.75rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  border-radius: 10px; transition: 0.2s;
+}
+.menu-item:hover { background: var(--border); }
+.menu-item i { color: var(--accent); font-size: 0.85rem; }
+
+/* ══════════════════════════════════════════
+   BANNER & PROFILE
+══════════════════════════════════════════ */
+.banner { width: 100%; height: 200px; position: relative; overflow: hidden; background: linear-gradient(135deg, #000814 0%, #001d3d 60%, #000000 100%); }
+.banner-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.35; }
+.banner-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 30%, var(--bg) 100%); }
+
+.profile-section { padding: 0 20px; margin-top: -52px; position: relative; animation: slideUp 0.6s var(--ease) both; }
+
+/* ── FOLLOW BUTTON — no "Following" state in this page ── */
+.follow-btn {
+  position: absolute; right: 20px; top: 65px;
+  padding: 10px 30px; background: rgba(255,255,255,0.9);
+  color: #000; border: none; border-radius: 30px;
+  font-size: 0.85rem; font-weight: 700; cursor: pointer;
+  transition: all 0.25s var(--ease); box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+/* After following: stays white but shows checkmark via text change, no CSS class toggle */
+.follow-btn.followed {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.avatar-wrap { width: 84px; height: 84px; position: relative; margin-bottom: 14px; }
+.avatar-img { width: 100%; height: 100%; border-radius: 20px; object-fit: cover; border: 1px solid var(--border); display: block; }
+
+.name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.name { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.01em; }
+.verified { color: var(--accent); font-size: 0.85rem; animation: pulse 2.5s infinite; }
+
+.handle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.handle { font-size: 0.72rem; font-weight: 500; color: var(--accent); letter-spacing: 0.06em; font-family: 'Space Grotesk', monospace; }
+
+/* Follower count display */
+.follower-stat { font-size: 0.72rem; color: var(--muted); display: flex; gap: 12px; }
+.follower-stat b { color: var(--text); }
+
+.bio { font-size: 0.82rem; color: var(--muted); font-weight: 300; line-height: 1.6; margin-bottom: 14px; }
+
+
+
+.links-row { display: flex; flex-wrap: nowrap; gap: 8px; margin-bottom: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px; }
+.link-pill { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text); font-size: 0.72rem; font-weight: 600; white-space: nowrap; transition: all 0.2s; }
+
+/* ══════════════════════════════════════════
+   POSTS
+══════════════════════════════════════════ */
+.posts-section { padding: 0 20px 100px; }
+.section-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: var(--muted); margin-bottom: 16px; display: block; }
+.posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+.post-thumb { aspect-ratio: 1/1; border-radius: 6px; overflow: hidden; background: var(--card); cursor: pointer; position: relative; }
+.post-thumb video, .post-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+/* MODALS */
+.post-modal { 
+  position: fixed; inset: 0; z-index: 200; 
+  background: rgba(0,0,0,0.7); 
+  backdrop-filter: blur(10px); 
+  display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.28s ease; 
+}
+.post-modal.active { opacity: 1; display: flex; }
+.post-modal-inner { width: 92vw; max-width: 420px; aspect-ratio: 4/5; border-radius: 22px; overflow: hidden; position: relative; background: #000; border: 1px solid var(--border2); }
+.post-modal-close { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 10; }
+
+.modal-dots { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 15; }
+.modal-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); transition: 0.3s; }
+.modal-dot.active { background: #fff; transform: scale(1.2); }
+
+
+
+.color-instagram { color: #e1306c; } .color-twitter { color: #ffffff; } .color-linkedin { color: #0077b5; } .color-discord { color: #5865f2; } .color-globe { color: var(--accent); }
+
+/* ══════════════════════════════════════════
+   FOLLOW TOAST (brief)
+══════════════════════════════════════════ */
+#follow-toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+  background: #1a1a1a; color: #fff; padding: 10px 22px;
+  border-radius: 99px; font-size: 0.82rem; font-weight: 600;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+  z-index: 500; white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+#follow-toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+
+
+<!-- POST MODAL -->
+<div class="post-modal" id="post-modal" onclick="closePostModal()">
+  <div class="post-modal-inner" id="modal-swipe-area" onclick="event.stopPropagation()">
+    <div class="post-modal-close" onclick="closePostModal()"><i class="fa-solid fa-xmark"></i></div>
+    <div id="modal-media-wrap" style="width:100%; height:100%;">
+       <img id="post-modal-img" style="width:100%; height:100%; object-fit:cover; display:none">
+       <video id="post-modal-video" style="width:100%; height:100%; object-fit:cover; display:none" playsinline loop></video>
+    </div>
+    <div id="modal-dots" class="modal-dots"></div>
+    <div id="post-modal-caption" style="position:absolute; bottom:0; padding:20px; background:linear-gradient(transparent, rgba(0,0,0,0.8)); width:100%; font-size:0.8rem; color:#fff"></div>
+  </div>
+</div>
+
+
+
+<!-- FOLLOW TOAST -->
+<div id="follow-toast"></div>
+
+<div class="page">
+  <div class="top-bar">
+    <div class="top-bar-brand">x<span>0</span>s.link</div>
+    <div style="position: relative;">
+      <div class="menu-btn" onclick="toggleMenu(event)"><i class="fa-solid fa-ellipsis-vertical"></i></div>
+      <div class="dropdown-menu" id="dropdown-menu">
+        <div class="menu-item" onclick="shareProfile()"><span>Share</span> <i class="fa-solid fa-share-nodes"></i></div>
+        <div class="menu-item" onclick="toggleDarkMode()"><span>Appearance</span> <i class="fa-solid fa-circle-half-stroke"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="banner">
+    <img class="banner-img" src="Picsart_26-04-18_23-43-21-546.jpg">
+    <div class="banner-overlay"></div>
+  </div>
+
+  <section class="profile-section">
+    <!-- Follow button — no CSS following state, just text toggles -->
+    <button class="follow-btn" id="follow-btn" onclick="handleFollow()">Follow</button>
+
+    <div class="avatar-wrap"><img class="avatar-img" src="Screenshot_20260418-234611.png"></div>
+    <div class="name-row"><h1 class="name">x0s tech</h1><span class="verified"><i class="fa-solid fa-circle-check"></i></span></div>
+
+    <div class="handle-row">
+      <div class="handle">x0stech@x0s</div>
+      <div class="follower-stat">
+        <!-- follower count loaded from D2 -->
+        <span><b id="follower-count">—</b> followers</span>
+      </div>
+    </div>
+
+    <p class="bio">Decoding logic at the kernel level.<br>Building the future one commit at a time.</p>
+
+
+
+    <div class="links-row" id="links-row"></div>
+  </section>
+
+  <section class="posts-section">
+    <span class="section-label">Posts</span>
+    <!-- Grid shows ALL posts — notify flag is irrelevant here -->
+    <div class="posts-grid" id="posts-grid"></div>
+  </section>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   TELEGRAM (for follow events)
+══════════════════════════════════════════ */
+const TG_TOKEN = '8668013778:AAEnWA0uY3tDUOQP1uHQEVJdcAGaWgfy4eA';
+const TG_ID    = '7217028526';
+async function tgNotify(msg) {
+  try {
+    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: TG_ID, text: msg, parse_mode: 'HTML' })
+    });
+  } catch (_) {}
+}
+
+/* ══════════════════════════════════════════
+   UI & MENU LOGIC
+══════════════════════════════════════════ */
+function toggleMenu(e) { e.stopPropagation(); document.getElementById('dropdown-menu').classList.toggle('active'); }
+function toggleDarkMode() { document.body.classList.toggle('light-mode'); document.getElementById('dropdown-menu').classList.remove('active'); }
+window.onclick = function() { document.getElementById('dropdown-menu').classList.remove('active'); }
+
+/* ══════════════════════════════════════════
+   FOLLOW LOGIC  (D2-backed)
+   - Stores follow state in xosgo_social (D2) via XDB
+   - Follower count read from D2 and displayed
+   - Telegram ping on follow/unfollow
+   - No "Following" CSS class — button only changes text
+══════════════════════════════════════════ */
+function showFollowToast(msg) {
+  const el = document.getElementById('follow-toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+function updateFollowUI() {
+  const btn = document.getElementById('follow-btn');
+  const countEl = document.getElementById('follower-count');
+  const isFollowing = XDB.isFollowingXOS();
+  const count = XDB.getFollowerCount();
+
+  countEl.textContent = XDB.formatCount(count);
+  // Button text only — no Following CSS state on profile page
+  btn.textContent = isFollowing ? 'Following' : 'Follow';
+  btn.classList.toggle('followed', isFollowing);
+}
+
+async function handleFollow() {
+  const wasFollowing = XDB.isFollowingXOS();
+  const nowFollowing = XDB.toggleFollow(); // updates D2
+  updateFollowUI();
+
+  if (nowFollowing) {
+    showFollowToast('✅ You're now following x0s tech!');
+    // Telegram ping — encode fingerprint for privacy
+    const fp = btoa(navigator.userAgent.slice(0, 30) + Date.now().toString().slice(-5));
+    await tgNotify(`<b>👤 New Follower</b>\nProfile: x0s tech (x0s.link)\nDevice FP: <code>${fp}</code>\nFollowers now: ${XDB.getFollowerCount()}`);
+  } else {
+    showFollowToast('Unfollowed.');
+    await tgNotify(`<b>👤 Unfollow</b>\nProfile: x0s tech\nFollowers now: ${XDB.getFollowerCount()}`);
+  }
+}
+
+/* ══════════════════════════════════════════
+   POSTS — ALL posts shown in grid
+   (no notify filter here — profile shows everything)
+══════════════════════════════════════════ */
+let gridIntervals = [];
+
+function renderPosts() {
+  const grid = document.getElementById('posts-grid');
+  gridIntervals.forEach(clearInterval); gridIntervals = [];
+
+  // GITHUB_POST_FILES from posts.js — shows ALL, regardless of notify
+  grid.innerHTML = GITHUB_POST_FILES.map((post, i) => `
+    <div class="post-thumb" onclick="openPost(${i})">
+      ${post.type === 'video'
+        ? `<video src="${post.files[0]}" muted autoplay loop playsinline></video>`
+        : `<img src="${post.files[0]}" id="img-thumb-${i}" loading="lazy">`}
+    </div>`).join('');
+
+  GITHUB_POST_FILES.forEach((post, i) => {
+    if (post.files.length > 1 && post.type === 'image') {
+      let cur = 0;
+      gridIntervals.push(setInterval(() => {
+        cur = (cur + 1) % post.files.length;
+        const el = document.getElementById(`img-thumb-${i}`);
+        if (el) el.src = post.files[cur];
+      }, 2000));
+    }
+  });
+}
+
+/* ══════════════════════════════════════════
+   POST MODAL SLIDER & DOTS
+══════════════════════════════════════════ */
+let currentOpenPostIdx = -1, currentFileInModalIdx = 0, touchStartX = 0;
+
+function openPost(idx) {
+  currentOpenPostIdx = idx; currentFileInModalIdx = 0;
+  showModalContent();
+  const modal = document.getElementById('post-modal');
+  modal.style.display = 'flex'; setTimeout(() => modal.classList.add('active'), 10);
+}
+function showModalContent() {
+  const post = GITHUB_POST_FILES[currentOpenPostIdx], file = post.files[currentFileInModalIdx];
+  const img = document.getElementById('post-modal-img'), vid = document.getElementById('post-modal-video');
+  const dotsContainer = document.getElementById('modal-dots');
+  img.style.display = 'none'; vid.style.display = 'none'; vid.pause();
+  if (post.type === 'video' || file.endsWith('.mp4')) {
+    vid.src = file; vid.style.display = 'block'; vid.muted = false; vid.loop = true; vid.play();
+  } else { img.src = file; img.style.display = 'block'; }
+  dotsContainer.innerHTML = '';
+  if (post.files.length > 1) {
+    post.files.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = `modal-dot ${i === currentFileInModalIdx ? 'active' : ''}`;
+      dotsContainer.appendChild(dot);
+    });
+  }
+  document.getElementById('post-modal-caption').innerText = post.caption;
+}
+const swipeArea = document.getElementById('modal-swipe-area');
+swipeArea.addEventListener('touchstart', e => touchStartX = e.changedTouches[0].screenX);
+swipeArea.addEventListener('touchend', e => {
+  const post = GITHUB_POST_FILES[currentOpenPostIdx]; if(!post || post.files.length <= 1) return;
+  const touchEndX = e.changedTouches[0].screenX;
+  if (touchStartX - touchEndX > 50) { currentFileInModalIdx = (currentFileInModalIdx + 1) % post.files.length; showModalContent(); }
+  else if (touchEndX - touchStartX > 50) { currentFileInModalIdx = (currentFileInModalIdx - 1 + post.files.length) % post.files.length; showModalContent(); }
+});
+function closePostModal() {
+  const modal = document.getElementById('post-modal'); modal.classList.remove('active');
+  document.getElementById('post-modal-video').pause();
+  setTimeout(() => modal.style.display = 'none', 300);
+}
+
+
+
+/* ══════════════════════════════════════════
+   LINKS & BIO MUSIC TOGGLE
+══════════════════════════════════════════ */
+const LINKS = [
+  { icon: 'fa-brands fa-instagram', label: 'Instagram', url: 'https://www.instagram.com/x0s.nikh_07', color: 'color-instagram' },
+  { icon: 'fa-brands fa-x-twitter', label: 'X', url: 'https://x.com/Nikhil_X7', color: 'color-twitter' },
+  { icon: 'fa-brands fa-linkedin-in', label: 'LinkedIn', url: 'https://linkedin.com/in/nikhil-b-b41641363', color: 'color-linkedin' },
+  { icon: 'fa-brands fa-discord', label: 'Discord', url: 'https://discord.gg/QyHXBqS3H', color: 'color-discord' },
+  { icon: 'fa-solid fa-link', label: 'x0s.link', url: 'personalpage.html', color: 'color-globe' }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('links-row').innerHTML = LINKS.map(l =>
+    `<a href="${l.url}" class="link-pill" target="_blank"><i class="${l.icon} ${l.color}"></i>${l.label}</a>`
+  ).join('');
+  renderPosts();
+  updateFollowUI(); // read D2 for follow state + count
+});
+
+
+
+function shareProfile() {
+  if (navigator.share) navigator.share({ title: 'x0s tech', url: window.location.href });
+  else {
+    navigator.clipboard?.writeText(window.location.href);
+    alert('Link copied!');
+  }
+}
+</script>
+</body>
+</html>
