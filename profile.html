@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<!-- Data files (posts only, follow logic replaced with localStorage) -->
+<!-- posts.js must exist for post data -->
 <script src="posts.js"></script>
 
 <style>
@@ -111,7 +111,7 @@ html, body {
 
 .profile-section { padding: 0 20px; margin-top: -52px; position: relative; animation: slideUp 0.6s var(--ease) both; }
 
-/* ── FOLLOW BUTTON — pure localStorage toggle ── */
+/* FOLLOW BUTTON - clean toggle, no messages */
 .follow-btn {
   position: absolute; right: 20px; top: 65px;
   padding: 10px 30px; background: rgba(255,255,255,0.9);
@@ -135,7 +135,6 @@ html, body {
 .handle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .handle { font-size: 0.72rem; font-weight: 500; color: var(--accent); letter-spacing: 0.06em; font-family: 'Space Grotesk', monospace; }
 
-/* Follower count display */
 .follower-stat { font-size: 0.72rem; color: var(--muted); display: flex; gap: 12px; }
 .follower-stat b { color: var(--text); }
 
@@ -144,9 +143,7 @@ html, body {
 .links-row { display: flex; flex-wrap: nowrap; gap: 8px; margin-bottom: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 2px; }
 .link-pill { display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text); font-size: 0.72rem; font-weight: 600; white-space: nowrap; transition: all 0.2s; }
 
-/* ══════════════════════════════════════════
-   POSTS
-══════════════════════════════════════════ */
+/* POSTS GRID */
 .posts-section { padding: 0 20px 100px; }
 .section-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.22em; color: var(--muted); margin-bottom: 16px; display: block; }
 .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
@@ -162,26 +159,13 @@ html, body {
 }
 .post-modal.active { opacity: 1; display: flex; }
 .post-modal-inner { width: 92vw; max-width: 420px; aspect-ratio: 4/5; border-radius: 22px; overflow: hidden; position: relative; background: #000; border: 1px solid var(--border2); }
-.post-modal-close { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; background: rgba(0,0,0,0.5 border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 10; }
+.post-modal-close { position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; background: rgba(0,0,0,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 10; }
 
 .modal-dots { position: absolute; bottom: 70px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 15; }
 .modal-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); transition: 0.3s; }
 .modal-dot.active { background: #fff; transform: scale(1.2); }
 
 .color-instagram { color: #e1306c; } .color-twitter { color: #ffffff; } .color-linkedin { color: #0077b5; } .color-discord { color: #5865f2; } .color-globe { color: var(--accent); }
-
-/* ══════════════════════════════════════════
-   FOLLOW TOAST
-══════════════════════════════════════════ */
-#follow-toast {
-  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
-  background: #1a1a1a; color: #fff; padding: 10px 22px;
-  border-radius: 99px; font-size: 0.82rem; font-weight: 600;
-  opacity: 0; pointer-events: none; transition: opacity 0.3s;
-  z-index: 500; white-space: nowrap;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-}
-#follow-toast.show { opacity: 1; }
 </style>
 </head>
 <body>
@@ -198,9 +182,6 @@ html, body {
     <div id="post-modal-caption" style="position:absolute; bottom:0; padding:20px; background:linear-gradient(transparent, rgba(0,0,0,0.8)); width:100%; font-size:0.8rem; color:#fff"></div>
   </div>
 </div>
-
-<!-- FOLLOW TOAST -->
-<div id="follow-toast"></div>
 
 <div class="page">
   <div class="top-bar">
@@ -228,7 +209,7 @@ html, body {
     <div class="handle-row">
       <div class="handle">x0stech@x0s</div>
       <div class="follower-stat">
-        <span><b id="follower-count">0</b> followers</span>
+        <span><b id="follower-count">—</b> followers</span>
       </div>
     </div>
 
@@ -245,123 +226,97 @@ html, body {
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════════════
-   🔥 LOCALSTORAGE FOLLOW SYSTEM (FULLY SELF-CONTAINED)
-   - Toggle follow/unfollow with persistent state in localStorage
-   - Follower count automatically increments/decrements based on follow status
-   - No external XDB dependency — pure client-side memory
-   ═══════════════════════════════════════════════════════════════════════════ */
+   LOCALSTORAGE FOLLOW SYSTEM (SILENT TOGGLE)
+   - No popups, no toast, no emoji messages.
+   - Click toggles between "Follow" and "Following".
+   - Follower count automatically +1 when follow, -1 when unfollow.
+   - All data persists in browser localStorage.
+═══════════════════════════════════════════════════════════════════════════ */
 
-// Default base follower count (original count before any local interaction)
-const DEFAULT_FOLLOWER_COUNT = 13842;  // ~13.8k followers
+// Base real follower count (initial value)
+const BASE_FOLLOWER_COUNT = 13842;
 
-// Helper: format numbers like 1.2k, 13.8k, 999
+// Helper: format large numbers (e.g., 13.8k)
 function formatCount(num) {
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
   if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
   return num.toString();
 }
 
-// --- localStorage keys ---
-const STORAGE_FOLLOWING = 'x0s_following_status';   // boolean: true = following
-const STORAGE_FOLLOWER_COUNT = 'x0s_follower_count'; // number
+// localStorage keys
+const FOLLOW_KEY = 'x0s_following_state';
+const COUNT_KEY  = 'x0s_follower_count';
 
-// Initialize local storage with default values if not present
-function initLocalFollowData() {
-  let storedFollow = localStorage.getItem(STORAGE_FOLLOWING);
-  let storedCount = localStorage.getItem(STORAGE_FOLLOWER_COUNT);
-  
-  if (storedFollow === null) {
-    localStorage.setItem(STORAGE_FOLLOWING, 'false');
+// Initialize localStorage defaults if missing
+function initFollowStorage() {
+  if (localStorage.getItem(FOLLOW_KEY) === null) {
+    localStorage.setItem(FOLLOW_KEY, 'false');
   }
-  if (storedCount === null) {
-    localStorage.setItem(STORAGE_FOLLOWER_COUNT, DEFAULT_FOLLOWER_COUNT);
-  } else {
-    // ensure it's a number
-    let count = parseInt(storedCount, 10);
-    if (isNaN(count)) {
-      localStorage.setItem(STORAGE_FOLLOWER_COUNT, DEFAULT_FOLLOWER_COUNT);
-    }
+  if (localStorage.getItem(COUNT_KEY) === null) {
+    localStorage.setItem(COUNT_KEY, BASE_FOLLOWER_COUNT);
   }
-  // Edge case: if following true but follower count hasn't been adjusted? sync on load: ensure consistency.
-  const isFollowing = localStorage.getItem(STORAGE_FOLLOWING) === 'true';
-  let currentCount = parseInt(localStorage.getItem(STORAGE_FOLLOWER_COUNT), 10);
-  const baseExpectedCount = DEFAULT_FOLLOWER_COUNT + (isFollowing ? 1 : 0);
-  if (currentCount !== baseExpectedCount && !isNaN(currentCount)) {
-    // repair inconsistency: prefer follower count derived from following status
-    localStorage.setItem(STORAGE_FOLLOWER_COUNT, baseExpectedCount);
+  // Ensure consistency: if following true but count not incremented
+  const isFollowing = localStorage.getItem(FOLLOW_KEY) === 'true';
+  let currentCount = parseInt(localStorage.getItem(COUNT_KEY), 10);
+  const expectedCount = BASE_FOLLOWER_COUNT + (isFollowing ? 1 : 0);
+  if (currentCount !== expectedCount) {
+    localStorage.setItem(COUNT_KEY, expectedCount);
   }
 }
 
-// Get current follow status (boolean)
-function isFollowingXOS() {
-  return localStorage.getItem(STORAGE_FOLLOWING) === 'true';
+// Get current follow status
+function isFollowing() {
+  return localStorage.getItem(FOLLOW_KEY) === 'true';
 }
 
 // Get current follower count (number)
 function getFollowerCount() {
-  let count = parseInt(localStorage.getItem(STORAGE_FOLLOWER_COUNT), 10);
-  return isNaN(count) ? DEFAULT_FOLLOWER_COUNT : count;
+  let val = parseInt(localStorage.getItem(COUNT_KEY), 10);
+  return isNaN(val) ? BASE_FOLLOWER_COUNT : val;
 }
 
-// Update UI (button text + follower display) based on localStorage state
-function updateFollowUI() {
+// Update UI: button text and follower count display
+function updateUI() {
   const btn = document.getElementById('follow-btn');
-  const countEl = document.getElementById('follower-count');
-  if (!btn || !countEl) return;
+  const countSpan = document.getElementById('follower-count');
+  if (!btn || !countSpan) return;
   
-  const following = isFollowingXOS();
+  const following = isFollowing();
   const count = getFollowerCount();
   
-  countEl.textContent = formatCount(count);
-  // Button text only — clean toggle, style adapted but no persistent "Following" background override required
   btn.textContent = following ? 'Following' : 'Follow';
   if (following) {
     btn.classList.add('followed');
   } else {
     btn.classList.remove('followed');
   }
+  countSpan.textContent = formatCount(count);
 }
 
-// Show brief toast message
-function showFollowToast(msg) {
-  const toast = document.getElementById('follow-toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2200);
-}
-
-// Core toggle: Follow / Unfollow with localStorage sync & count update
-function handleFollow() {
-  const wasFollowing = isFollowingXOS();
-  let currentCount = getFollowerCount();
+// Main toggle function – no messages, just pure toggle
+function handleFollowToggle() {
+  const wasFollowing = isFollowing();
   
   if (!wasFollowing) {
-    // 🔘 FOLLOW action: increment count, set following = true
-    const newCount = currentCount + 1;
-    localStorage.setItem(STORAGE_FOLLOWER_COUNT, newCount);
-    localStorage.setItem(STORAGE_FOLLOWING, 'true');
-    showFollowToast('✅ Following x0s tech!');
+    // Follow: increment count, set state to true
+    const newCount = getFollowerCount() + 1;
+    localStorage.setItem(COUNT_KEY, newCount);
+    localStorage.setItem(FOLLOW_KEY, 'true');
   } else {
-    // 🔘 UNFOLLOW action: decrement count, set following = false
-    const newCount = Math.max(currentCount - 1, DEFAULT_FOLLOWER_COUNT); // never go below default baseline
-    localStorage.setItem(STORAGE_FOLLOWER_COUNT, newCount);
-    localStorage.setItem(STORAGE_FOLLOWING, 'false');
-    showFollowToast('❌ Unfollowed x0s tech.');
+    // Unfollow: decrement count, set state to false
+    const newCount = Math.max(getFollowerCount() - 1, BASE_FOLLOWER_COUNT);
+    localStorage.setItem(COUNT_KEY, newCount);
+    localStorage.setItem(FOLLOW_KEY, 'false');
   }
   
-  // Update button & counter display
-  updateFollowUI();
-  
-  // Optional: Gentle console feedback for developers
-  console.log(`[x0s] Follow state toggled. Now following: ${!wasFollowing}, followers: ${getFollowerCount()}`);
+  // Refresh UI
+  updateUI();
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   ALL OTHER UI FEATURES: MENU, DARK MODE, POST RENDERING, MODAL, LINKS, ETC.
-   (unchanged, but fully functional)
-═══════════════════════════════════════════════════════════════════════════ */
+   ALL OTHER UI FEATURES: MENU, DARK MODE, POST RENDERING, MODAL, LINKS
+═╩═══════════════════════════════════════════════════════════════════════════ */
 
-// Menu & share & dark mode
 function toggleMenu(e) { 
   e.stopPropagation(); 
   document.getElementById('dropdown-menu').classList.toggle('active'); 
@@ -377,11 +332,12 @@ function shareProfile() {
   if (navigator.share) navigator.share({ title: 'x0s tech', url: window.location.href });
   else {
     navigator.clipboard?.writeText(window.location.href);
-    alert('Link copied!');
+    // simple alert – no emoji, just functional
+    alert('Link copied');
   }
 }
 
-// --- POSTS grid & carousel logic (depends on posts.js) ---
+// --- POSTS grid & carousel (depends on posts.js) ---
 let gridIntervals = [];
 
 function renderPosts() {
@@ -477,7 +433,7 @@ function closePostModal() {
   }
 }
 
-// Social links 
+// Social links data
 const LINKS = [
   { icon: 'fa-brands fa-instagram', label: 'Instagram', url: 'https://www.instagram.com/x0s.nikh_07', color: 'color-instagram' },
   { icon: 'fa-brands fa-x-twitter', label: 'X', url: 'https://x.com/Nikhil_X7', color: 'color-twitter' },
@@ -487,13 +443,13 @@ const LINKS = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   INITIALIZATION: SETUP LOCALSTORAGE FOLLOW, RENDER LINKS, POSTS, UPDATE UI
+   INITIALIZE EVERYTHING
 ═══════════════════════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Initialize follow data in localStorage (default values if absent)
-  initLocalFollowData();
+  // Initialize follow storage (creates keys if missing, ensures consistency)
+  initFollowStorage();
   
-  // 2. Render links row
+  // Render social links
   const linksRow = document.getElementById('links-row');
   if (linksRow) {
     linksRow.innerHTML = LINKS.map(l =>
@@ -501,42 +457,32 @@ document.addEventListener('DOMContentLoaded', () => {
     ).join('');
   }
   
-  // 3. Render posts (if GITHUB_POST_FILES exists)
+  // Render posts grid (depends on posts.js)
   if (typeof GITHUB_POST_FILES !== 'undefined') {
     renderPosts();
   } else {
-    document.getElementById('posts-grid').innerHTML = '<div style="color:var(--muted); text-align:center;">Error: posts data missing</div>';
+    const grid = document.getElementById('posts-grid');
+    if (grid) grid.innerHTML = '<div style="color:var(--muted); text-align:center;">Posts data missing</div>';
   }
   
-  // 4. Attach follow button event listener explicitly to avoid any conflict
+  // Attach follow button event listener (pure toggle, no messaging)
   const followBtn = document.getElementById('follow-btn');
   if (followBtn) {
-    // Remove any existing inline onclick and use clean event handler
-    followBtn.removeEventListener('click', handleFollow);
-    followBtn.addEventListener('click', handleFollow);
+    followBtn.removeEventListener('click', handleFollowToggle);
+    followBtn.addEventListener('click', handleFollowToggle);
   }
   
-  // 5. Update UI (shows correct follower count + button text)
-  updateFollowUI();
-  
-  // Additional consistency: if after update, counts are correct based on follow status
-  const currentFollow = isFollowingXOS();
-  let expectedCount = DEFAULT_FOLLOWER_COUNT + (currentFollow ? 1 : 0);
-  let actual = getFollowerCount();
-  if (actual !== expectedCount && actual > 0) {
-    // repair again (just in case)
-    localStorage.setItem(STORAGE_FOLLOWER_COUNT, expectedCount);
-    updateFollowUI();
-  }
+  // Set initial UI
+  updateUI();
 });
 
-// Expose global functions so inline onclick handlers in HTML work (menu, share, post modal)
+// Expose globals for inline handlers
 window.toggleMenu = toggleMenu;
 window.toggleDarkMode = toggleDarkMode;
 window.shareProfile = shareProfile;
 window.openPost = openPost;
 window.closePostModal = closePostModal;
-window.handleFollow = handleFollow;   // ensure global availability
+window.handleFollowToggle = handleFollowToggle;
 </script>
 </body>
 </html>
